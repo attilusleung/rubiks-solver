@@ -1,2 +1,2 @@
 # rubiks-solver
-A rubiks cube sovler written in python
+A rubiks cube solver written in python
