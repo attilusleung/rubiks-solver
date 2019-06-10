@@ -2,10 +2,6 @@ import numpy as np
 from random import randrange, choice
 
 
-# LVIEW = np.array([F,D,B,U])
-# UVIEW = slice(0, 4)
-# FVIEW = np.array([U,L,D,R])
-
 class Cube:
     CWHITE  = "\u001b[37m"
     CRED    = "\u001b[31m"
@@ -61,11 +57,7 @@ class Cube:
 
     def randomize(self):
         for i in range(randrange(500)):
-            #self._assert_count(self.array)
-            try:
-                self._verify_cube()
-            except NotImplementedError:
-                print("skipping asserts because _verify_cube is not implemented")
+            #self._verify_cube()
             c = choice([self.L, self.F, self.R, self.B, self.U , self.D])
             r = randrange(1,3)
             self.roll(c, r)
@@ -79,18 +71,12 @@ class Cube:
     def __str__(self):
         ret = np.full(self.STRSIZE, " ", dtype=np.dtype('U16'))
         ret[self.STRLEFT] = self.array[0]
-        #print(self.array[0])
         ret[self.STRFRONT] = self.array[1]
         ret[self.STRRIGHT] = self.array[2]
         ret[self.STRBACK] = self.array[3]
         ret[self.STRUP] = self.array[4]
         ret[self.STRDOWN] = self.array[5]
-        # print(repr(ret))
         return "\n".join([''.join([ret[i, x] for x in range(0,self.STRSIZE[1])]) for i in range(0, self.STRSIZE[0])])
-        # for i in range(0, STRSIZE[0]):
-        #     for j in range(0, STRSIZE[1]):
-        #         print(ret[i,j], end = "")
-        #     print()
 
 
     def __repr__(self):
@@ -175,6 +161,4 @@ class Cube:
         for i in string:
             self.rot(*self.dir_map[i])
 
-
-a = Cube()
 

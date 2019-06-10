@@ -19,11 +19,6 @@ class Cube2D(Cube):
         for i in legit_corners:
             assert i in corners, i
 
-    # def std_rot(self):
-    #     corners = {{a[0,0,1], a[1,0,0], a[4,1,0]}, {a[0,1,1], a[1,1,0], a[5,0,0]}, {a[1,0,1], a[4,1,1], a[2,0,0]},
-    #                {a[1,1,1], a[2,1,0], a[5,0,1]}, {a[2,0,1], a[3,0,0], a[4,0,1]}, {a[2,1,1], a[3,1,0], a[5,1,1]},
-    #                {a[3,0,1], a[4,0,0], a[0,0,0]}, {a[3,1,1], a[5,1,0], a[0,1,0]}}
-
     def hash_state(self):
         it = np.nditer(self.array, flags=["common_dtype"])
         ret = "".join((i.item() for i in it))
@@ -41,4 +36,4 @@ b = Cube2D()
 b.roll_str("U")
 
 c = Cube2D()
-c.roll_str("FUL")
+c.roll_str("FULFd")
