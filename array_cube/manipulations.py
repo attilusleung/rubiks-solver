@@ -1,3 +1,11 @@
+"""
+Functions to manipulate a 6x2x2 array representing a 2x2 rubiks cube.
+
+The array represents an unwrapped cube, where each 2x2 array represents
+the leftward, frontward, rightward, backward, uupward, downward faces
+of the rubiks cube respectively.
+"""
+
 from enum import Enum
 import gc
 import numpy as np
@@ -45,16 +53,26 @@ class ColorValue(Enum):
 
 
 def roll(cube, face, direction):
+    """
+    Perform a roll operation on a specific face of the rubiks cube.
+
+    See also roll_str, which is a simpler alternative to this function.
+
+    :param face: An integer that represents the face to be rotated
+    :param direction: The number of 90 degree clockwise rotations
+                      performed on the cube. Negative numbers
+                      represent anticlockwise rotations.
+    """
     #print(["L", "F", "R", "B", "U", "D"][face] + str(direction))
     cube = np.copy(cube)
     if face == Man.U.value:
-        cube[0:4, 0] = np.roll(cube[0:4, 0], -direction, axis=0) 
+        cube[0:4, 0] = np.roll(cube[0:4, 0], -direction, axis=0)
         cube[Man.U.value] = np.rot90(cube[Man.U.value], k=-direction)
     elif face == Man.D.value:
         cube[0:4, -1] = np.roll(cube[0:4, -1], direction, axis=0)
         cube[Man.D.value] = np.rot90(cube[Man.D.value], k=-direction)
     elif face == Man.F.value:
-        sl = np.array([cube[Man.U.value, -1, :], cube[Man.R.value, :, 0], 
+        sl = np.array([cube[Man.U.value, -1, :], cube[Man.R.value, :, 0],
                        cube[Man.D.value, 0, ::-1], cube[Man.L.value, ::-1, -1]])
         sl = np.roll(sl, direction, axis=0)
         cube[Man.U.value, -1, :] = sl[0]
@@ -90,11 +108,37 @@ def roll(cube, face, direction):
     #print(Man.__str__())
 
 def roll_str(cube, string):
+    """
+    Perform roll operations on the cube based on a sequence of characters in a string.
+
+    The function reads each character of a string and performs an operation on the face
+    specified by the character in sequence.
+
+    F, B, L, R, U, D represents a clockwise rotation to the Front, Back, Left, Right,
+    Upward, Downward faces of the cube respectively.
+    f, b, l, r, u, d represents an anticlockwise rotation to the front, back, left, right,
+    upward, downward faces of the cube respectively.
+
+    :param string: A string where each character represents a roll operation on the cube.
+                   Cannot contain any other characters other than the 12 specified above.
+    """
     for i in string:
         cube = roll(cube, *dir_map[i])
     return cube
 
-def rot(cube, face, direction): #TODO: only U is correct
+def rot(cube, face, direction):
+    """
+    Rotate the cube 90 degrees in relation to one of the faces of the cube.
+
+    See also rot_str, which is a simpler alternative to this function
+
+    :param face: An intiger representing a face which specifies
+                 the axis which the cube is rotated along
+    :param direction: The number of 90 degrees clockwise rotations performed
+                      on the cube. Negative numbers represent anticlockwise
+                      rotations.
+    """
+
     cube = np.copy(cube)
     if face == Man.U.value:
         cube[0:4] = np.roll(cube[0:4], -direction, axis=0)
@@ -122,23 +166,48 @@ def rot(cube, face, direction): #TODO: only U is correct
     return cube
 
 def rot_str(cube, string):
+    """
+    Perform rotation operations on the cube based on a sequence of characters in a string.
+
+    The function reads each character of a string and performs an operation along the face
+    specified by the character in sequence.
+
+    U, L, F represents a clockwise rotation along the Upward, Leftward, Frontward faces of the
+    cube respectively.
+    u, l, f represents an anticlockwise rotation along the upward, leftward, frontward
+    faces of the cube respectively.
+
+    :param string: A string where each character represents a rotation operation on the cube.
+                   Cannot contain any other characters other than the 6 specified above.
+    """
     for i in string:
         cube = rot(cube, *dir_map[i])
     return cube
 
 
-def randomize(cube):
-    for i in range(randrange(500)):
+def randomize(cube, moves=500):
+    """
+    Randomizes the rubiks cube.
+
+    :param moves: Integer representing the number of random moves to be applied to the cube
+    """
+    for i in range(randrange(moves)):
         #verify_cube()
         c = choice([Man.L.value, Man.F.value, Man.R.value, Man.B.value, Man.U.value , Man.D.value])
-        r = randrange(1,3)
+        r = randrange(1, 3)
         cube = roll(cube, c, r)
     gc.collect()
     return cube
 
-def new_cube(randomize = False):
-    cube = np.array([[[x for i in range(SIZE[0])] for j in range(SIZE[1])] 
-                        for x in [Color.ORANGE.value, Color.GREEN.value, Color.RED.value, 
+def new_cube(randomize=False):
+    """
+    Create a 6x2x2 array that represents a rubiks cube.
+
+    :param randomize: Boolean option to randomize cube on init
+    :returns: 6x2x2 numpy array representing a rubiks cube
+    """
+    cube = np.array([[[x for i in range(SIZE[0])] for j in range(SIZE[1])]
+                        for x in [Color.ORANGE.value, Color.GREEN.value, Color.RED.value,
                                     Color.YELLOW.value, Color.WHITE.value, Color.BLUE.value]], dtype=np.int8)
     if randomize:
         return cube.randomize()
@@ -146,6 +215,20 @@ def new_cube(randomize = False):
 
 
 def cube_str(cube):
+    """
+    Return a ascii color coded string representation of a cube.
+
+    The string takes on the following form, where x and o characters
+    represents different sides of the cube:
+      xx
+      xx
+    xxooxxoo
+    xxooxxoo
+      xx
+      xx
+
+    :returns: String representation of the rubiks cube
+    """
     ret = np.full(STRSIZE, " ", dtype=np.dtype('U16'))
     ret[STRLEFT] = cube[0]
     ret[STRFRONT] = cube[1]
@@ -159,10 +242,7 @@ def cube_str(cube):
 
 
 def hash_cube(cube):
-        it = np.nditer(cube, flags=["common_dtype"])
-        ret = "".join((str(i.item()) for i in it))
-        return ret
-
-
-
-
+    """Hashes the current state of the cube."""
+    it = np.nditer(cube, flags=["common_dtype"])
+    ret = "".join((str(i.item()) for i in it))
+    return ret
