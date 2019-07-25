@@ -3,7 +3,7 @@ Functions to manipulate an integer representing a 2x2 rubiks cube.
 """
 # TODO: Documentation
 
-from helpers import *
+from .helpers import *
 from enum import Enum, IntEnum
 from functools import reduce
 from random import randrange, choice
@@ -85,6 +85,10 @@ def roll_str(cube, string):
         cube = roll(cube, *dir_map[i])
     return cube
 
+rot_swaps = {Man.F.value: ((5, 6), (1, 2), (3, 4), (0, 1)),
+             Man.L.value: ((0, 1), (2, 3), (1, 2), (4, 5)),
+             Man.U.value: ((2, 3), (5, 6), (4, 5), (3, 4))}
+
 def rot(cube, face, direction):
     """
     Rotate the cube 90 degrees in relation to one of the faces of the cube.
@@ -97,7 +101,34 @@ def rot(cube, face, direction):
                       on the cube. Negative numbers represent anticlockwise
                       rotations.
     """
-    pass
+    # TODO: COUNTERCLOCKWISE
+    if face == Man.F.value:
+        cube = bit_roll(cube, direction, 0, 4)
+        cube = bit_roll(cube, direction, 4, 8)
+        cube = bit_roll(cube, -direction, 8, 12)
+        cube = bit_roll(cube, direction, 12, 16)
+        cube = bit_roll(cube, direction, 16, 20)
+        cube = bit_roll(cube, direction, 20, 24)
+        for i in (range(1, 4) if direction > 0 else reversed(range(1, 4))):
+            cube = bit_swap(cube, *rot_swaps[Man.F.value][0], *rot_swaps[Man.F.value][i], bit_unit=16)
+        # print(cube_str(cube))
+        return cube
+
+    if face == Man.L.value:
+        cube = bit_roll(cube, -direction, 12, 16)
+        cube = bit_roll(cube, direction, 20, 24)
+        cube = bit_swap(cube, 0, 1, 1, 2, bit_unit=8) if direction > 0 else bit_swap(cube, 2, 3, 3, 4, bit_unit=8)
+        for i in (range(1, 4) if direction > 0 else reversed(range(1, 4))):
+            cube = bit_swap(cube, *rot_swaps[Man.L.value][0], *rot_swaps[Man.L.value][i], bit_unit=16)
+        # print(cube_str(cube))
+        return cube
+
+    if face == Man.U.value:
+        cube = bit_roll(cube, direction, 4, 8)
+        cube = bit_roll(cube, -direction, 0, 4)
+        for i in (range(1, 4) if direction > 0 else reversed(range(1, 4))):
+            cube = bit_swap(cube, *rot_swaps[Man.U.value][0], *rot_swaps[Man.U.value][i], bit_unit=16)
+        return cube
 
 def rot_str(cube, string):
     """
@@ -127,7 +158,7 @@ def randomize(cube, moves=500):
     """
     for i in range(randrange(moves)):
         #verify_cube()
-        c = choice([Man.L.value, Man.F.value, Man.R.value, Man.B.value, Man.U.value , Man.D.value])
+        c = choice([Man.L.value, Man.F.value, Man.R.value, Man.B.value, Man.U.value, Man.D.value])
         r = randrange(1, 3)
         cube = roll(cube, c, r)
     return cube
@@ -173,19 +204,20 @@ def cube_str(cube):
     lines.append(f'  {bit_repr(bit_roll(((masks[1] & cube) >> 16), 1, 0, 2), 8)}')
 
     t = (masks[2] & cube) >> 40
-    for i in range(8, 32, 8):
-        t = bit_strip(t, i, i+8)
+    for i in range(2, 8, 2):
+        t = bit_strip(t, i, i+2)
     lines.append(bit_repr(t, 32))
 
 
     t = (masks[3] & cube) >> 32
-    for i in range(8, 36, 8):
-        t = bit_strip(t, i, i+8)
-        t = bit_roll(t, 1, i, i+8)
+    for i in range(2, 10, 2):
+        t = bit_strip(t, i, i+2)
+        t = bit_roll(t, 1, i, i+2)
     lines.append(bit_repr(t, 32))
 
     lines.append(f'  {bit_repr((masks[4] & cube) >> 8, 8)}')
     lines.append(f'  {bit_repr(bit_roll(((masks[5] & cube)), 1, 0, 2), 8)}')
+    # print(lines)
 
     for i, l in enumerate(lines):
         l = l.replace('0b', '')
@@ -195,10 +227,6 @@ def cube_str(cube):
         lines[i] = l
 
     return "\n".join(lines)
-
-
-    # return "\n".join(lines)
-    # return "\n".join([''.join([ret[i, x] for x in range(0,STRSIZE[1])]) for i in range(0, STRSIZE[0])])
 
 
 def hash_cube(cube):
