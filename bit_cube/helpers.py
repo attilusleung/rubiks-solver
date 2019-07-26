@@ -57,5 +57,10 @@ def bit_swap(i, start_1, end_1, start_2, end_2, bit_unit=4):
     # print(bit_repr(clear(i, start_2, end_2), 16*6))
     return (swp << start_2) | clear(i, start_2, end_2)
 
+def bit_pad(i, start, length, bit_unit=4):
+    start *= bit_unit
+    length *= bit_unit
+    return (((ones(i.bit_length() - start) << start) & i) << length) | i
+
 def or_sum(it):
     return reduce(lambda x, y: x | y, it)

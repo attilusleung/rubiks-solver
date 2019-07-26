@@ -191,25 +191,25 @@ def randomize(cube, moves=500):
 
     :param moves: Integer representing the number of random moves to be applied to the cube
     """
-    for i in range(randrange(moves)):
+    for i in range(moves):
         #verify_cube()
-        c = choice([Man.L.value, Man.F.value, Man.R.value, Man.B.value, Man.U.value , Man.D.value])
+        c = choice([Man.L.value, Man.F.value, Man.R.value, Man.B.value, Man.U.value, Man.D.value])
         r = randrange(1, 3)
         cube = roll(cube, c, r)
     gc.collect()
     return cube
 
-def new_cube(randomize=False):
+def new_cube(random=False):
     """
     Create a 6x2x2 array that represents a rubiks cube.
 
-    :param randomize: Boolean option to randomize cube on init
+    :param random: Boolean option to randomize cube on init
     :returns: 6x2x2 numpy array representing a rubiks cube
     """
     cube = np.array([[[x for i in range(SIZE[0])] for j in range(SIZE[1])]
                         for x in [Color.ORANGE.value, Color.GREEN.value, Color.RED.value,
                                     Color.YELLOW.value, Color.WHITE.value, Color.BLUE.value]], dtype=np.int8)
-    if randomize:
+    if random:
         return cube.randomize()
     return cube
 
