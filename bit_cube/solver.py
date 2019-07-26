@@ -16,6 +16,7 @@ class Solver:
 
         :param cube: The Cube object to be solved.
         """
+        self.org = cube
         self.queue = [cube]
         self.visited = {cube: (None, "")}
         self._init_final()
@@ -33,7 +34,7 @@ class Solver:
         for i in ["", "L", "l", "F", "f", "LL"]:
             c = rot_str(new_cube(), i)
             for j in range(0,4):
-                cc = rot(c, Man.U, j)
+                cc = rot_str(c, "U"*j)
                 self.final.append(cc)
 
     def solve(self):
@@ -42,8 +43,11 @@ class Solver:
 
         :returns: The string sequence of operations that solves the cube.
         """
+        acc = 0
         if self.queue[0] in self.final: return ""
         while self.queue:
+            print(acc)
+            acc += 1
             s = self.search()
             if s is not None: return s
 
@@ -59,11 +63,28 @@ class Solver:
         step = self.queue.pop(0)
         for s in self.op:
             manstep = roll_str(step, s)
-            h = manstep
-            if h not in self.visited:
-                hc = step
-                self.visited[h] = (hc, self.visited[hc][1] + s)
-                if h in self.final:
-                    return self.visited[h][1]
-                print(self.visited[h][1])
+            if manstep not in self.visited:
+                self.visited[manstep] = (step, s)
+                if manstep in self.final:
+                    return self.backtrack(manstep)
                 self.queue.append(manstep)
+
+    def backtrack(self, node):
+        acc = ""
+        # print(self.visited[node])
+        while self.visited[node][0] is not None:
+            # print(acc)
+            acc = self.visited[node][1] + acc
+            node = self.visited[node][0]
+        return acc
+
+
+    # def search_by_depth(self, i):
+    #     c = True
+    #     while c:
+    #         s = self.search()
+    #         if s is not None:
+    #             print(s)
+    #             return s
+    #         c = len(self.visited[self.queue[0]][1]) <= i
+    #     return 'search failed'

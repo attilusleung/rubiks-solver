@@ -197,11 +197,12 @@ def randomize(cube, moves=500):
 
     :param moves: Integer representing the number of random moves to be applied to the cube
     """
+    cho = []
     for i in range(randrange(moves)):
-        c = choice([Man.L.value, Man.F.value, Man.U.value])
-        r = choice([1, -1])
-        cube = roll(cube, c, r)
-        # verify_cube(cube)
+        c = choice(['L', 'l', 'U', 'u', 'F', 'f'])
+        cho.append(c)
+        cube = roll_str(cube, c)
+    print(cho)
     return cube
 
 NEW = 80596284442678810400085
